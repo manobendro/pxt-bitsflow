@@ -1,0 +1,39 @@
+{
+    "name": "core",
+    "description": "Bitsflow core: platform + PXT VM interpreter (core---vm chain). Depends on base for the language runtime. Compiles to PXT VM bytecode.",
+    "additionalFilePath": "../../node_modules/pxt-common-packages/libs/core---vm",
+    "files": [
+        "README.md",
+        "dal.d.ts",
+        "dalpatch.d.ts",
+        "scheduler.cpp",
+        "config.cpp",
+        "target.cpp",
+        "pxt.h",
+        "platform.h",
+        "platform.cpp",
+        "pxtcore.h",
+        "pins.h",
+        "control.cpp",
+        "shims.d.ts",
+        "enums.d.ts",
+        "ns.ts",
+        "timer.ts",
+        "platform_includes.h",
+        "codalemu.cpp",
+        "dmesg.cpp",
+        "keys.cpp",
+        "vm.cpp",
+        "vmload.cpp",
+        "vm.h",
+        "vmcache.cpp",
+        "verify.cpp",
+        "pxtparts.json",
+        "Makefile",
+        "vmscreen.cpp"
+    ],
+    "public": true,
+    "dependencies": {
+        "base": "file:../base"
+    }
+}

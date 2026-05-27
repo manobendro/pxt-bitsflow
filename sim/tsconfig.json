@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "declaration": true,
+        "outFile": "../built/sim.js",
+        "rootDir": "..",
+        "newLine": "LF",
+        "moduleResolution": "node",
+        "sourceMap": false,
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "scripthost",
+            "es2017"
+        ],
+        "types": []
+    },
+    "include": [
+        "*.ts"
+    ]
+}

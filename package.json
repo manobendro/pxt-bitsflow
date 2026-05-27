@@ -1,0 +1,24 @@
+{
+    "name": "pxt-bitsflow",
+    "version": "0.0.1",
+    "description": "MakeCode target compiling to the PXT VM bytecode (.pxt64)",
+    "private": true,
+    "keywords": [
+        "MakeCode",
+        "PXT",
+        "VM",
+        "bytecode"
+    ],
+    "license": "MIT",
+    "dependencies": {
+        "pxt-common-packages": "13.2.5",
+        "pxt-core": "12.3.12"
+    },
+    "devDependencies": {
+        "typescript": "4.8.3"
+    },
+    "scripts": {
+        "serve": "pxt serve",
+        "build": "pxt buildtarget"
+    }
+}

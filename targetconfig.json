@@ -1,0 +1,8 @@
+{
+    "packages": {
+        "approvedRepoLib": {},
+        "builtinExtensionsLib": {},
+        "bannedRepos": []
+    },
+    "languageRestriction": ""
+}

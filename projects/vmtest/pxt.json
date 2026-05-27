@@ -1,0 +1,6 @@
+{
+    "name": "vmtest",
+    "description": "",
+    "dependencies": { "core": "file:../../libs/core" },
+    "files": [ "main.ts" ]
+}

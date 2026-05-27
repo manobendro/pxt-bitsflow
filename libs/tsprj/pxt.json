@@ -1,0 +1,6 @@
+{
+    "name": "{0} bitsflow",
+    "dependencies": { "core": "file:../core" },
+    "description": "",
+    "files": [ "main.ts", "README.md" ]
+}

@@ -1,0 +1,58 @@
+{
+    "id": "bitsflow",
+    "name": "Bitsflow",
+    "title": "MakeCode for Bitsflow (PXT VM)",
+    "nickname": "bitsflow",
+    "description": "Program with Blocks, JavaScript, or Python and compile to the PXT VM bytecode (.pxt64).",
+    "corepkg": "core",
+    "bundleddirs": [
+        "libs/base",
+        "libs/core"
+    ],
+    "cloud": {
+        "workspace": false,
+        "packages": false,
+        "sharing": false,
+        "importing": false,
+        "embedding": false,
+        "githubPackages": false
+    },
+    "compile": {
+        "isNative": true,
+        "nativeType": "vm",
+        "hasHex": true,
+        "sourceMap": true,
+        "switches": {},
+        "vmOpCodes": true,
+        "shortStackTraces": true
+    },
+    "compileService": {
+        "buildEngine": "make",
+        "skipCloudBuild": true,
+        "serviceId": "bitsflow"
+    },
+    "runtime": {
+        "mathBlocks": true,
+        "textBlocks": true,
+        "listsBlocks": true,
+        "variablesBlocks": true,
+        "logicBlocks": true,
+        "loopsBlocks": true,
+        "functionBlocks": true,
+        "onStartNamespace": "basic",
+        "onStartColor": "#0078d7"
+    },
+    "simulator": {
+        "autoRun": true,
+        "aspectRatio": 1.22
+    },
+    "appTheme": {
+        "python": true,
+        "accentColor": "#0078d7",
+        "invertedMenu": true,
+        "logoUrl": "https://github.com/",
+        "homeUrl": "https://github.com/",
+        "privacyUrl": "https://github.com/",
+        "termsOfUseUrl": "https://github.com/"
+    }
+}
