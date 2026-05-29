@@ -1,0 +1,10 @@
+# Keep LF on files that run inside the Linux Docker container — a CRLF checkout
+# on Windows would make bash/node choke on the trailing \r.
+*.sh            text eol=lf
+*.js            text eol=lf
+*.ts            text eol=lf
+*.json          text eol=lf
+Dockerfile      text eol=lf
+.dockerignore   text eol=lf
+# Windows-only helper: keep CRLF.
+*.ps1           text eol=crlf

@@ -1,0 +1,5 @@
+# Build context is this docker/ folder. Only the Dockerfile + entrypoint.sh are
+# needed in the image; keep everything else out so the context stays tiny.
+*
+!Dockerfile
+!entrypoint.sh

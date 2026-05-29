@@ -18,7 +18,12 @@ libs/base              symlink -> pxt-common-packages/libs/base (language depend
 libs/blocksprj/        Blocks "New Project" template
 libs/tsprj/            JavaScript/Python template
 projects/vmtest/       a sample program (forever + console.log + pause)
-tools/build-vm-runtime.sh   build the native VM (pxt-vm-cli) on macOS and run a .pxt64
+projects/counter/      a richer sample (variables, math, conditionals)
+tools/build-vm-runtime.sh   build the native VM (pxt-vm-cli) on the host and run a .pxt64
+tools/build-pxt-core.sh     recompile pxt-core's CLI bundle (pure tsc) — used by Docker
+tools/docker-vm.ps1         Windows one-command build+run, fully inside Docker
+docker/Dockerfile           node:20 + gcc/make + pxt launcher (the portable VM build env)
+docker/entrypoint.sh        in-container: fix symlinks, (re)build pxt-core, build + run
 ```
 
 ## How the VM target is wired
@@ -60,6 +65,56 @@ basic.forever(function () {
 })
 ```
 
+
+## Run on Windows with Docker (maximum portability)
+
+The host needs **only Docker Desktop** — no Node, gcc, or make. Everything (the
+TS→bytecode compile, the C++ runtime build, and running the VM) happens inside a
+Linux container. Both `pxt` (pxt-core) and `pxt-bitsflow` must sit side-by-side
+under the same parent folder (e.g. `C:\Workshop\makecode\`), which is bind-mounted
+into the container at `/work`.
+
+```powershell
+# from the pxt-bitsflow folder — builds the image once, then builds + runs the program
+./tools/docker-vm.ps1                                  # defaults: projects/vmtest, 3s
+./tools/docker-vm.ps1 -Project projects/vmtest -Seconds 5
+./tools/docker-vm.ps1 -Rebuild                         # force-rebuild the image
+```
+
+Expected tail:
+
+```
+==> running: built/make/bld-x86_64-pc-linux/pxt-vm-cli-linux built/binary.pxt64
+[       0] image loaded
+[       3] Validation OK
+[      11] start main loop
+hello from PXT VM
+hello from PXT VM
+...
+```
+
+The sample is a `forever` loop, so it never exits — the wrapper stops it after
+`-Seconds`. Pass `-Seconds 0` (or `RUN_SECONDS=0`) to run until it exits / Ctrl-C.
+
+Equivalent raw Docker commands:
+
+```powershell
+docker build -t pxt-bitsflow-vm .\docker
+docker run --rm -e RUN_SECONDS=3 -v C:\Workshop\makecode:/work pxt-bitsflow-vm projects/vmtest
+```
+
+**How it works** (`docker/Dockerfile`, `docker/entrypoint.sh`):
+- Base `node:20-bookworm` + `build-essential` (gcc/make) + the tiny `pxt` launcher.
+- The entrypoint recreates `node_modules/pxt-core` and `libs/base` as native
+  *relative* symlinks inside the mount (Windows symlinks don't survive a bind
+  mount reliably; relative targets stay valid on the host too).
+- If `pxt-core`'s `built/` predates the local edits (the `make` build engine), it
+  is recompiled with `tools/build-pxt-core.sh` (pure `tsc` — no gulp/webapp build).
+- Then `pxt build --localbuild` runs inside Linux: the `make` engine compiles the
+  C++ runtime to `pxt-vm-cli-linux` and the program to `binary.pxt64`, which is run.
+
+> Build artifacts land under `projects/<proj>/built/` on the host (gitignored) and
+> are cached between runs, so re-runs only recompile what changed.
 
 ## Compile to VM bytecode + build the runtime + run — one pass, no Docker
 

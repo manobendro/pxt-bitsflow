@@ -1,0 +1,6 @@
+{
+    "name": "counter",
+    "description": "Counting demo: variables, math, conditionals over a forever loop.",
+    "dependencies": { "core": "file:../../libs/core" },
+    "files": [ "main.ts" ]
+}
