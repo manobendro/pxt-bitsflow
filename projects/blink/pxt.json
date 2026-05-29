@@ -1,0 +1,6 @@
+{
+    "name": "blink",
+    "description": "Blink an LED wired to a GPIO pin (forever loop + led.toggle).",
+    "dependencies": { "core": "file:../../libs/core" },
+    "files": [ "main.ts" ]
+}

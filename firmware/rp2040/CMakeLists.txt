@@ -12,10 +12,17 @@ set(CMAKE_CXX_STANDARD 11)
 
 pico_sdk_init()
 
-set(PXTAPP "${CMAKE_CURRENT_LIST_DIR}/../../projects/vmtest/built/make/pxtapp")
+# Which compiled project to embed + build against. The make-engine build of this
+# project produces both binary.pxt64 (-> generated/vm_image.c) and the pxtapp/ C++.
+if(NOT DEFINED PXT_PROJECT)
+    set(PXT_PROJECT "blink")
+endif()
+set(PXTAPP "${CMAKE_CURRENT_LIST_DIR}/../../projects/${PXT_PROJECT}/built/make/pxtapp")
 set(GENERATED "${CMAKE_CURRENT_LIST_DIR}/generated")
 
 file(GLOB BASE_CPP "${PXTAPP}/base/*.cpp")
+# Core VM sources. vmcache.cpp is intentionally excluded — it is an optional on-disk
+# image cache (dirent/opendir/fopen) that bare metal lacks and the boot path never uses.
 set(CORE_CPP
     "${PXTAPP}/core/scheduler.cpp"
     "${PXTAPP}/core/config.cpp"
@@ -23,9 +30,9 @@ set(CORE_CPP
     "${PXTAPP}/core/control.cpp"
     "${PXTAPP}/core/dmesg.cpp"
     "${PXTAPP}/core/keys.cpp"
+    "${PXTAPP}/core/led.cpp"
     "${PXTAPP}/core/vm.cpp"
     "${PXTAPP}/core/vmload.cpp"
-    "${PXTAPP}/core/vmcache.cpp"
     "${PXTAPP}/core/verify.cpp"
 )
 
@@ -49,6 +56,8 @@ target_compile_definitions(bitsflow_vm_pico PRIVATE
     PXT32=1
     PXT_VM=1
     PXT_RP2040=1
+    # GC heap = 2^17 = 128KB (fits RP2040's 264KB SRAM). Default would be 1MB.
+    PXT_VM_HEAP_ALLOC_BITS=17
     PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS=0
 )
 
@@ -58,6 +67,9 @@ target_compile_options(bitsflow_vm_pico PRIVATE
     -fno-rtti
     -fno-exceptions
     -fno-unwind-tables
+    # The VM C++ was written for x86/x64 where int32_t == int. On 32-bit ARM newlib
+    # int32_t is `long`, so int*/int32_t* assignments are a hard error without this.
+    -fpermissive
     -Wno-unused-parameter
     -Wno-unused-variable
     -Wno-unused-function
@@ -65,6 +77,7 @@ target_compile_options(bitsflow_vm_pico PRIVATE
 
 target_link_libraries(bitsflow_vm_pico pico_stdlib hardware_sync hardware_watchdog)
 
+# Serial output goes to BOTH USB CDC and UART0 (GPIO0=TX, GPIO1=RX, 115200 8N1).
 pico_enable_stdio_usb(bitsflow_vm_pico 1)
-pico_enable_stdio_uart(bitsflow_vm_pico 0)
+pico_enable_stdio_uart(bitsflow_vm_pico 1)
 pico_add_extra_outputs(bitsflow_vm_pico)

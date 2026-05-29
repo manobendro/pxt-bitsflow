@@ -1,0 +1,25 @@
+# Portable RP2040 firmware toolchain: arm-none-eabi GCC + CMake + a pinned pico-sdk.
+# Builds firmware/rp2040 into a .uf2. The workspace is bind-mounted at /work at run
+# time (see tools/build-rp2040.ps1); this image COPYs nothing.
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        cmake \
+        gcc-arm-none-eabi \
+        libnewlib-arm-none-eabi \
+        libstdc++-arm-none-eabi-newlib \
+        build-essential \
+        git \
+        python3 \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Pinned pico-sdk (RP2040). Submodules (tinyusb etc.) are needed for USB stdio.
+ARG PICO_SDK_REF=2.1.1
+RUN git clone --depth 1 --branch ${PICO_SDK_REF} \
+        https://github.com/raspberrypi/pico-sdk.git /opt/pico-sdk \
+    && git -C /opt/pico-sdk submodule update --init --depth 1
+ENV PICO_SDK_PATH=/opt/pico-sdk
+
+WORKDIR /work/pxt-bitsflow/firmware/rp2040

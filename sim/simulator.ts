@@ -56,3 +56,12 @@ namespace pxsim.control {
         runtime.board.writeSerial(str);
     }
 }
+
+// led.on/off/toggle — no LED in the sim, so just report state to the console.
+namespace pxsim.led {
+    let state = false;
+    function show() { board().writeSerial("LED " + (state ? "on" : "off") + "\n"); }
+    export function on() { state = true; show(); }
+    export function off() { state = false; show(); }
+    export function toggle() { state = !state; show(); }
+}

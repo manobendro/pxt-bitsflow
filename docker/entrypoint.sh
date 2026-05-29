@@ -45,6 +45,11 @@ cd "$ROOT/$PROJ"
 echo "==> pxt build --localbuild   (emits binary.pxt64 + builds pxt-vm-cli via the make engine)"
 PXT_NODOCKER=1 pxt build --localbuild
 
+if [ -n "${BUILD_ONLY:-}" ]; then
+    echo "==> BUILD_ONLY set — skipping VM run (bytecode + pxtapp are built)."
+    exit 0
+fi
+
 VM="$(ls built/make/bld-*/pxt-vm-cli* 2>/dev/null | head -1 || true)"
 PXT64=built/binary.pxt64
 if [ -z "$VM" ] || [ ! -x "$VM" ]; then

@@ -116,6 +116,62 @@ docker run --rm -e RUN_SECONDS=3 -v C:\Workshop\makecode:/work pxt-bitsflow-vm p
 > Build artifacts land under `projects/<proj>/built/` on the host (gitignored) and
 > are cached between runs, so re-runs only recompile what changed.
 
+## Program a real RP2040 — blink an LED from Blocks
+
+This target also builds a **bare-metal RP2040 firmware** that embeds the PXT VM and runs
+your compiled `.pxt64` on the chip. You write the program in Blocks/JS/Python (e.g. the
+`led` blocks below), and the firmware blinks a real LED.
+
+### 1. Write the program (Blocks → `led`)
+
+A small **LED** block category is built into the core (`libs/core/led.ts` + `led.cpp`):
+
+```ts
+basic.forever(function () {
+    led.toggle()
+    basic.pause(500)
+})
+```
+
+`led.on()`, `led.off()`, `led.toggle()` drive a GPIO. `projects/blink` is this program.
+
+### 2. Wire the LED
+
+External LED on **GPIO 15** (default; change `BITSFLOW_LED_PIN` in `libs/core/led.cpp`):
+
+```
+GPIO15 ──[ ~330Ω ]──▶|── GND
+                     LED
+```
+
+### 3. Build the firmware (.uf2) — fully in Docker
+
+Host needs only Docker (arm-none-eabi + pico-sdk live in the `pxt-bitsflow-pico` image):
+
+```powershell
+./tools/build-rp2040.ps1                 # project defaults to "blink"
+./tools/build-rp2040.ps1 -Project blink  # -> firmware/rp2040/build/bitsflow_vm_pico.uf2
+```
+
+Three stages: compile the project to `binary.pxt64` + `pxtapp/` C++, embed the image into
+`firmware/rp2040/generated/vm_image.c`, then compile the firmware with the pico-sdk.
+
+### 4. Flash
+
+Hold **BOOTSEL** while plugging in the Pico, then copy `bitsflow_vm_pico.uf2` onto the
+`RPI-RP2` drive (or `picotool load`). The board reboots and the LED blinks twice a second.
+`console.log` output is available over USB serial.
+
+### How the VM runs on a 32-bit MCU
+
+The VM has two value models: **PXT64** (requires 64-bit pointers — unusable on RP2040) and
+**PXT32** (assumes a <256 MB address space — flash `<0x10000000`, RAM `0x20000000`). The
+RP2040's XIP flash at `0x10000000` breaks PXT32's read-only / vtable assumptions, so the
+firmware build defines `PXT_RP2040`, which reuses PXT64's `gcBase`-relative GC model while
+keeping 32-bit values (patches in `tools/patch-vm-sources.js`), with a 128 KB GC heap to fit
+SRAM. `firmware/rp2040/src/rp2040_platform.cpp` backs the scheduler clock/sleep with the
+RP2040 timer; `vmcache.cpp` (on-disk cache) is excluded.
+
 ## Compile to VM bytecode + build the runtime + run — one pass, no Docker
 
 ```bash

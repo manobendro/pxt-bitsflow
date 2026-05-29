@@ -30,7 +30,9 @@
         "verify.cpp",
         "pxtparts.json",
         "Makefile",
-        "vmscreen.cpp"
+        "vmscreen.cpp",
+        "led.ts",
+        "led.cpp"
     ],
     "public": true,
     "dependencies": {
