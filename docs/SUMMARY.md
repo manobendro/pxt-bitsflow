@@ -14,3 +14,4 @@
     * [UART](reference/uart.md)
     * [OLED display](reference/oled.md)
     * [BMP280 sensor](reference/bmp280.md)
+    * [MPU6050 sensor](reference/mpu6050.md)

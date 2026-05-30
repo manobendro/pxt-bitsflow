@@ -38,3 +38,4 @@ oled.init(128, 64, 60);
 * [UART](reference/uart.md) — second serial bus
 * [OLED display](reference/oled.md) — SSD1306 over I2C
 * [BMP280 sensor](reference/bmp280.md) — temperature + pressure over I2C
+* [MPU6050 sensor](reference/mpu6050.md) — accelerometer + gyroscope over I2C
