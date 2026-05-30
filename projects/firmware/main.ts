@@ -25,6 +25,14 @@ pins.digitalWritePin(DigitalPin.P0, 1)
 n = pins.digitalReadPin(DigitalPin.P1)
 pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
 
+// neopixel / WS2812
+const strip = neopixel.create(DigitalPin.P3, 8)
+strip.setBrightness(64)
+strip.setPixelColor(0, neopixel.rgb(255, 0, 0))
+strip.showColor(neopixel.colors(NeoPixelColors.Green))
+strip.clear()
+strip.show()
+
 // console / serial
 console.log(s)
 

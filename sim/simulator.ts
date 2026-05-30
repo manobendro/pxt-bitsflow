@@ -78,3 +78,11 @@ namespace pxsim.pins {
     }
     export function setPull(name: number, pull: number) { /* no-op in sim */ }
 }
+
+// neopixel/WS2812 — no strip in the sim; report the byte count to the console.
+namespace pxsim.neopixel {
+    export function sendBuffer(pin: number, buf: any) {
+        const n = buf && buf.data ? buf.data.length : 0;
+        board().writeSerial("neopixel: " + n + " bytes -> pin " + pin + "\n");
+    }
+}

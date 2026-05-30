@@ -60,7 +60,7 @@ if ($RebuildFirmware -or -not (Test-Path $bundledFw)) {
     Write-Host "==> [firmware] building VM firmware (shim-manifest superset, no embedded program)" -ForegroundColor Cyan
     Invoke-Native docker (@("run", "--rm", "-e", "BUILD_ONLY=1") + $mounts + @($vmImage, "projects/firmware"))
     Invoke-Native docker (@("run", "--rm") + $mounts + @($picoImage, "bash", "-lc",
-        "cmake -B build -S . -DPXT_PROJECT=firmware && cmake --build build -j4"))
+        "cmake --fresh -B build -S . -DPXT_PROJECT=firmware && cmake --build build -j4"))
     Copy-Item $fwOut $firmwareUf2 -Force
     New-Item -ItemType Directory -Force (Split-Path $bundledFw) | Out-Null
     Copy-Item $fwOut $bundledFw -Force

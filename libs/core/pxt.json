@@ -34,7 +34,9 @@
         "led.ts",
         "led.cpp",
         "pins.ts",
-        "pins.cpp"
+        "pins.cpp",
+        "neopixel.ts",
+        "neopixel.cpp"
     ],
     "public": true,
     "dependencies": {

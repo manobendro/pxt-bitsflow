@@ -34,6 +34,7 @@ set(CORE_CPP
     "${PXTAPP}/core/keys.cpp"
     "${PXTAPP}/core/led.cpp"
     "${PXTAPP}/core/pins.cpp"
+    "${PXTAPP}/core/neopixel.cpp"
     "${PXTAPP}/core/vm.cpp"
     "${PXTAPP}/core/vmload.cpp"
     "${PXTAPP}/core/verify.cpp"
@@ -77,7 +78,7 @@ target_compile_options(bitsflow_vm_pico PRIVATE
     -Wno-unused-function
 )
 
-target_link_libraries(bitsflow_vm_pico pico_stdlib hardware_sync hardware_watchdog)
+target_link_libraries(bitsflow_vm_pico pico_stdlib hardware_sync hardware_watchdog hardware_pio hardware_clocks)
 
 # Serial output goes to BOTH USB CDC and UART0 (GPIO0=TX, GPIO1=RX, 115200 8N1).
 pico_enable_stdio_usb(bitsflow_vm_pico 1)
