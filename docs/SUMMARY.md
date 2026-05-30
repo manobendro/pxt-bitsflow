@@ -15,3 +15,4 @@
     * [OLED display](reference/oled.md)
     * [BMP280 sensor](reference/bmp280.md)
     * [MPU6050 sensor](reference/mpu6050.md)
+    * [Sonar (HC-SR04)](reference/sonar.md)

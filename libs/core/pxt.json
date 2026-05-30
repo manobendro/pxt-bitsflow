@@ -39,6 +39,7 @@
         "oled.ts",
         "bmp280.ts",
         "mpu6050.ts",
+        "sonar.ts",
         "neopixel.ts",
         "neopixel.cpp",
         "spi.ts",
