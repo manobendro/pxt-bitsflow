@@ -42,7 +42,15 @@
         "i2c.ts",
         "i2c.cpp",
         "uart.ts",
-        "uart.cpp"
+        "uart.cpp",
+        "pwm.ts",
+        "pwm.cpp",
+        "analog.ts",
+        "analog.cpp",
+        "music.ts",
+        "music.cpp",
+        "timing.ts",
+        "timing.cpp"
     ],
     "public": true,
     "dependencies": {

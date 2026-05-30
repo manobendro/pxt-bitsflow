@@ -25,12 +25,24 @@ declare namespace pins {
     /**
      * Configure the pull resistor of a pin.
      * @param name the pin to configure
-     * @param pull the pull direction
+     * @param pull the pull direction: 0 = down, 1 = up, 2 = none
      */
     //% blockId=device_set_pull block="set pull pin %name to %pull"
     //% weight=18
     //% shim=pins::setPull
-    function setPull(name: DigitalPin, pull: PinPullMode): void;
+    function setPull(name: DigitalPin, pull: PullMode): void;
+}
+
+/**
+ * GPIO pull-resistor direction.
+ */
+const enum PullMode {
+    //% block=down
+    Down = 0,
+    //% block=up
+    Up = 1,
+    //% block=none
+    None = 2
 }
 
 // RP2040 GPIOs. (On a Raspberry Pi Pico, GP23/24/25 are used internally; the others map

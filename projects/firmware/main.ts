@@ -23,7 +23,7 @@ led.toggle()
 // digital GPIO
 pins.digitalWritePin(DigitalPin.P0, 1)
 n = pins.digitalReadPin(DigitalPin.P1)
-pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
+pins.setPull(DigitalPin.P2, PullMode.Up)
 
 // neopixel / WS2812
 const strip = neopixel.create(DigitalPin.P3, 8)
@@ -61,6 +61,28 @@ uart.writeString("hi")
 uart.writeBuffer(control.createBuffer(2))
 n = uart.available()
 uart.readBuffer(1)
+
+// PWM + servo
+pwm.analogWritePin(DigitalPin.P0, 512)
+pwm.analogSetPeriod(DigitalPin.P0, 1000)
+pwm.servoWritePin(DigitalPin.P1, 90)
+pwm.servoSetPulse(DigitalPin.P1, 1500)
+
+// analog in (ADC)
+n = analog.analogReadPin(DigitalPin.P26)
+n = analog.analogReadRaw(DigitalPin.P27)
+n = analog.analogReadMillivolts(DigitalPin.P28)
+
+// tone / buzzer
+music.setPin(DigitalPin.P0)
+music.playTone(Note.C4, 200)
+music.ringTone(Note.A4)
+music.rest(100)
+
+// pin timing / pulse
+n = timing.pulseIn(DigitalPin.P2, PulseValue.High, 1000000)
+n = timing.micros()
+timing.delayMicros(100)
 
 // console / serial
 console.log(s)

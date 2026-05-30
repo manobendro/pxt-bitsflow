@@ -114,3 +114,27 @@ namespace pxsim.uart {
     export function readBuffer(size: number): any { return pxsim.BufferMethods.createBuffer(size); }
     export function available(): number { return 0; }
 }
+
+// PWM / servo — no hardware in the sim; log activity.
+namespace pxsim.pwm {
+    export function analogWritePin(pin: number, value: number) { board().writeSerial("pwm.analogWritePin " + pin + " <- " + value + "\n"); }
+    export function analogSetPeriod(pin: number, micros: number) { board().writeSerial("pwm.analogSetPeriod " + pin + " " + micros + "us\n"); }
+    export function servoWritePin(pin: number, angle: number) { board().writeSerial("pwm.servoWritePin " + pin + " <- " + angle + "deg\n"); }
+    export function servoSetPulse(pin: number, micros: number) { board().writeSerial("pwm.servoSetPulse " + pin + " " + micros + "us\n"); }
+}
+
+namespace pxsim.analog {
+    export function analogReadPin(pin: number): number { board().writeSerial("analog.analogReadPin " + pin + "\n"); return 0; }
+    export function analogReadRaw(pin: number): number { board().writeSerial("analog.analogReadRaw " + pin + "\n"); return 0; }
+    export function analogReadMillivolts(pin: number): number { board().writeSerial("analog.analogReadMillivolts " + pin + "\n"); return 0; }
+}
+
+namespace pxsim.music {
+    export function tonePin(pin: number, frequency: number): void { board().writeSerial("music.tonePin " + pin + " " + frequency + "\n"); }
+}
+
+namespace pxsim.timing {
+    export function pulseIn(pin: number, value: number, maxDurationUs: number): number { board().writeSerial("timing.pulseIn " + pin + "," + value + "," + maxDurationUs + "\n"); return 0; }
+    export function micros(): number { return 0; }
+    export function delayMicros(us: number): void { board().writeSerial("timing.delayMicros " + us + "\n"); }
+}

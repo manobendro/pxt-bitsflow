@@ -38,6 +38,10 @@ set(CORE_CPP
     "${PXTAPP}/core/spi.cpp"
     "${PXTAPP}/core/i2c.cpp"
     "${PXTAPP}/core/uart.cpp"
+    "${PXTAPP}/core/pwm.cpp"
+    "${PXTAPP}/core/analog.cpp"
+    "${PXTAPP}/core/music.cpp"
+    "${PXTAPP}/core/timing.cpp"
     "${PXTAPP}/core/vm.cpp"
     "${PXTAPP}/core/vmload.cpp"
     "${PXTAPP}/core/verify.cpp"
@@ -81,7 +85,7 @@ target_compile_options(bitsflow_vm_pico PRIVATE
     -Wno-unused-function
 )
 
-target_link_libraries(bitsflow_vm_pico pico_stdlib hardware_sync hardware_watchdog hardware_pio hardware_clocks hardware_spi hardware_i2c hardware_uart)
+target_link_libraries(bitsflow_vm_pico pico_stdlib hardware_sync hardware_watchdog hardware_pio hardware_clocks hardware_spi hardware_i2c hardware_uart hardware_pwm hardware_adc)
 
 # Serial output goes to BOTH USB CDC and UART0 (GPIO0=TX, GPIO1=RX, 115200 8N1).
 pico_enable_stdio_usb(bitsflow_vm_pico 1)
