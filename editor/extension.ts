@@ -119,9 +119,50 @@ namespace pxt.editor {
         ];
     }
 
+    // --- UI tweaks injected as a stylesheet -------------------------------------
+    // pxt-core's prebuilt webapp applies theme color variables but loads no target CSS,
+    // so we inject our own <style> here (runs in the editor document on load).
+    // Edit BITSFLOW_CSS to add more editor tweaks.
+    const BITSFLOW_CSS = `
+/* Download "expand" menu z-index fix.
+   #editortools is z-index 41 (@blocklyToolboxZIndex+1) but the Blockly toolbox is
+   z-index 40 and its FLYOUT panel also stacks above the bar, so the download dropdown
+   menu (inside the bar) was painted UNDER the toolbox. Raise the whole bar above the
+   toolbox/flyout, and pin the open menu on top — still well below modals (@1000). */
+#editortools {
+    z-index: 200 !important;
+}
+#editortools .ui.dropdown .menu,
+#editortools .ui.dropdown.active .menu,
+#editortools .ui.dropdown .menu.visible {
+    z-index: 300 !important;
+}
+
+/* Consistent spacing for the download dropdown items. */
+#editortools .ui.dropdown .menu > .item {
+    padding: 0.7em 1em !important;
+    white-space: nowrap;
+}
+`;
+
+    function injectCss(): void {
+        try {
+            if (typeof document === "undefined") return;
+            const id = "bitsflow-ui-overrides";
+            if (document.getElementById(id)) return;
+            const style = document.createElement("style");
+            style.id = id;
+            style.textContent = BITSFLOW_CSS;
+            (document.head || document.documentElement).appendChild(style);
+        } catch (e) {
+            pxt.log("bitsflow: CSS inject failed " + e);
+        }
+    }
+
     // Register with the editor framework (assign rather than redeclare the framework hook).
     (pxt.editor as any).initExtensionsAsync = function (opts: ExtensionOptions): Promise<ExtensionResult> {
         projectView = opts.projectView;
+        injectCss();
         pxt.log("bitsflow editor extension loaded");
         const res: ExtensionResult = {
             deployAsync: deployAsync,
