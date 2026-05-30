@@ -21,6 +21,7 @@ timing.micros();
 spi.init(DigitalPin.P18, DigitalPin.P19, DigitalPin.P16);
 i2c.init(DigitalPin.P4, DigitalPin.P5);
 uart.init(DigitalPin.P8, DigitalPin.P9, 9600);
+oled.init(128, 64, 60);
 ```
 
 ## Pages
@@ -35,3 +36,4 @@ uart.init(DigitalPin.P8, DigitalPin.P9, 9600);
 * [SPI](reference/spi.md) — SPI master bus
 * [I2C](reference/i2c.md) — I2C master bus
 * [UART](reference/uart.md) — second serial bus
+* [OLED display](reference/oled.md) — SSD1306 over I2C

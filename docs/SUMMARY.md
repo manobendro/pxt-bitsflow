@@ -12,3 +12,4 @@
     * [SPI](reference/spi.md)
     * [I2C](reference/i2c.md)
     * [UART](reference/uart.md)
+    * [OLED display](reference/oled.md)
