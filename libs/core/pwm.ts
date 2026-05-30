@@ -1,7 +1,7 @@
 /**
  * PWM output and servo control.
  */
-//% color="#FF9900" weight=86 icon="" block="PWM"
+//% color="#FB8C00" weight=94 icon="" block="PWM"
 namespace pwm {
     /**
      * Write an analog (PWM) value to a pin.

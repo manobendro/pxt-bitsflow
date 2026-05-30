@@ -37,7 +37,7 @@ const enum NeoPixelMode {
 /**
  * Drive WS2812/NeoPixel and APA102/DotStar addressable RGB LED strips.
  */
-//% color="#00B295" weight=98 icon="" block="NeoPixel"
+//% color="#9575CD" weight=99 icon="" block="NeoPixel"
 namespace neopixel {
 
     /**

@@ -1,7 +1,7 @@
 /**
  * Read analog (ADC) values from a pin. RP2040 ADC pins are GP26–GP28.
  */
-//% color="#FF8000" weight=85 icon="" block="Analog"
+//% color="#F57C00" weight=95 icon="" block="Analog"
 declare namespace analog {
     /**
      * Read the analog value on a pin, scaled to 0-1023.

@@ -1,0 +1,55 @@
+{
+    "id": "bitsflow-dark",
+    "name": "Bitsflow Dark",
+    "weight": 1,
+    "monacoBaseTheme": "vs-dark",
+    "colors": {
+        "pxt-header-background": "#0E1726",
+        "pxt-header-foreground": "#FFFFFF",
+        "pxt-header-background-hover": "#16243A",
+        "pxt-header-foreground-hover": "#FFFFFF",
+        "pxt-header-stencil": "#11B5AC",
+
+        "pxt-primary-background": "#11B5AC",
+        "pxt-primary-foreground": "#06231F",
+        "pxt-primary-background-hover": "#15CEC3",
+        "pxt-primary-foreground-hover": "#06231F",
+        "pxt-primary-accent": "#11B5AC",
+
+        "pxt-secondary-background": "#2D2D30",
+        "pxt-secondary-foreground": "#E8E8E8",
+        "pxt-secondary-background-hover": "#3A3A3D",
+        "pxt-secondary-foreground-hover": "#FFFFFF",
+
+        "pxt-tertiary-background": "#252526",
+        "pxt-tertiary-foreground": "#E8E8E8",
+        "pxt-tertiary-background-hover": "#333335",
+        "pxt-tertiary-foreground-hover": "#FFFFFF",
+
+        "pxt-neutral-background1": "#1E1E1E",
+        "pxt-neutral-foreground1": "#E8E8E8",
+        "pxt-neutral-background2": "#252526",
+        "pxt-neutral-foreground2": "#E8E8E8",
+        "pxt-neutral-background3": "#2D2D30",
+        "pxt-neutral-foreground3": "#FFFFFF",
+        "pxt-neutral-stencil1": "#3A3A3D",
+
+        "pxt-page-background": "#1A1A1B",
+        "pxt-page-foreground": "#E8E8E8",
+
+        "pxt-target-background1": "#1E1E1E",
+        "pxt-target-foreground1": "#E8E8E8",
+        "pxt-target-background2": "#252526",
+        "pxt-target-foreground2": "#E8E8E8",
+        "pxt-target-background3": "#2D2D30",
+        "pxt-target-foreground3": "#FFFFFF",
+
+        "pxt-colored-button-foreground": "#FFFFFF",
+
+        "pxt-link": "#3FD0C6",
+        "pxt-link-hover": "#6FE0D8",
+
+        "pxt-error-background": "#E0533D",
+        "pxt-error-foreground": "#FFFFFF"
+    }
+}

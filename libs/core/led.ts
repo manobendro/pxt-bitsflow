@@ -1,7 +1,7 @@
 /**
  * Turn a single LED (wired to a GPIO pin) on and off.
  */
-//% color="#5C2D91" weight=100 icon="" block="LED"
+//% color="#7E57C2" weight=100 icon="" block="LED"
 declare namespace led {
     /**
      * Turn the LED on.

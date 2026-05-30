@@ -2,7 +2,7 @@
  * UART / serial communication on a second hardware UART (separate from console.log,
  * which uses USB + the stdio UART).
  */
-//% color="#B22222" weight=86 icon="" block="UART"
+//% color="#3F51B5" weight=80 icon="" block="UART"
 namespace uart {
     let _inited = false;
 

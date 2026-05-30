@@ -1,7 +1,7 @@
 /**
  * I2C master communication (one bus).
  */
-//% color="#D2691E" weight=87 icon="" block="I2C"
+//% color="#00ACC1" weight=81 icon="" block="I2C"
 namespace i2c {
     let _inited = false;
 

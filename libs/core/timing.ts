@@ -11,7 +11,7 @@ const enum PulseValue {
 /**
  * Microsecond timing and pulse measurement on a pin (polling based).
  */
-//% color="#708090" weight=84 icon="" block="Timing"
+//% color="#607D8B" weight=85 icon="" block="Timing"
 declare namespace timing {
     /**
      * Measure the length (in microseconds) of a pulse at the given level on a pin.

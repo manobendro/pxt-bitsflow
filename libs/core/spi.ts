@@ -1,7 +1,7 @@
 /**
  * SPI master communication (one bus).
  */
-//% color="#2E8B57" weight=88 icon="" block="SPI"
+//% color="#11B5AC" weight=82 icon="" block="SPI"
 namespace spi {
     let _inited = false;
 

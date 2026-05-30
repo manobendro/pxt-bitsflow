@@ -40,7 +40,7 @@
         "loopsBlocks": true,
         "functionBlocks": true,
         "onStartNamespace": "basic",
-        "onStartColor": "#0078d7"
+        "onStartColor": "#11B5AC"
     },
     "simulator": {
         "autoRun": true,
@@ -49,11 +49,25 @@
     "appTheme": {
         "python": true,
         "extendEditor": true,
-        "accentColor": "#0078d7",
+        "boardName": "Bitsflow RP2040",
+        "boardNickname": "Bitsflow",
+        "driveDisplayName": "RPI-RP2",
+        "organization": "Bitsflow",
+        "organizationText": "Bitsflow",
+        "organizationShortText": "Bitsflow",
+        "useTextLogo": true,
+        "accentColor": "#11B5AC",
+        "backgroundColor": "#1E1E1E",
+        "baseTheme": "dark",
+        "defaultColorTheme": "bitsflow-dark",
+        "highContrastColorTheme": "pxt-high-contrast",
         "invertedMenu": true,
-        "logoUrl": "https://github.com/",
-        "homeUrl": "https://github.com/",
-        "privacyUrl": "https://github.com/",
-        "termsOfUseUrl": "https://github.com/"
+        "coloredToolbox": true,
+        "selectLanguage": true,
+        "print": true,
+        "homeUrl": "/",
+        "copyrightText": "Bitsflow • PXT VM for RP2040",
+        "hideShareEmbed": true,
+        "hideHomeDetailsVideo": true
     }
 }

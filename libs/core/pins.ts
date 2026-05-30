@@ -1,7 +1,7 @@
 /**
  * Read and write digital values on the GPIO pins.
  */
-//% color="#A80000" weight=99 icon="" block="Pins"
+//% color="#D32F2F" weight=96 icon="" block="Pins"
 declare namespace pins {
     /**
      * Read the digital value (0 or 1) of a pin.
