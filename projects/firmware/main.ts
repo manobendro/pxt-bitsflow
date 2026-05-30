@@ -39,6 +39,29 @@ const dot = neopixel.createAPA102(DigitalPin.P4, DigitalPin.P5, 8)
 dot.setPixelColor(0, NeoPixelColors.Blue)
 dot.show()
 
+// SPI
+spi.init(DigitalPin.P18, DigitalPin.P19, DigitalPin.P16)
+spi.setFrequency(1000000)
+spi.setMode(0)
+n = spi.write(0x55)
+spi.transfer(control.createBuffer(2), control.createBuffer(2))
+
+// I2C
+i2c.init(DigitalPin.P4, DigitalPin.P5)
+i2c.setFrequency(100000)
+i2c.writeBuffer(0x3c, control.createBuffer(1))
+i2c.readBuffer(0x3c, 2)
+n = i2c.readNumber(0x3c, NumberFormat.UInt8LE)
+i2c.writeNumber(0x3c, 1, NumberFormat.UInt8LE)
+
+// UART
+uart.init(DigitalPin.P8, DigitalPin.P9, 9600)
+uart.setBaudRate(115200)
+uart.writeString("hi")
+uart.writeBuffer(control.createBuffer(2))
+n = uart.available()
+uart.readBuffer(1)
+
 // console / serial
 console.log(s)
 

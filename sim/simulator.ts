@@ -90,3 +90,27 @@ namespace pxsim.neopixel {
         board().writeSerial("dotstar: " + n + " bytes -> data " + dataPin + " clk " + clkPin + "\n");
     }
 }
+
+// SPI / I2C / UART — no hardware in the sim; log activity, reads return empty/0.
+namespace pxsim.spi {
+    export function init(sck: number, mosi: number, miso: number) { board().writeSerial("spi.init " + sck + "," + mosi + "," + miso + "\n"); }
+    export function write(value: number): number { board().writeSerial("spi.write " + value + "\n"); return 0; }
+    export function transfer(command: any, response: any) { board().writeSerial("spi.transfer\n"); }
+    export function setFrequency(hz: number) { board().writeSerial("spi.setFrequency " + hz + "\n"); }
+    export function setMode(mode: number) { board().writeSerial("spi.setMode " + mode + "\n"); }
+}
+
+namespace pxsim.i2c {
+    export function init(sda: number, scl: number) { board().writeSerial("i2c.init " + sda + "," + scl + "\n"); }
+    export function setFrequency(hz: number) { board().writeSerial("i2c.setFrequency " + hz + "\n"); }
+    export function readBuffer(address: number, size: number, repeated: boolean): any { return pxsim.BufferMethods.createBuffer(size); }
+    export function writeBuffer(address: number, buf: any, repeated: boolean) { board().writeSerial("i2c.writeBuffer addr=" + address + "\n"); }
+}
+
+namespace pxsim.uart {
+    export function init(tx: number, rx: number, baud: number) { board().writeSerial("uart.init " + tx + "," + rx + "@" + baud + "\n"); }
+    export function setBaudRate(baud: number) { board().writeSerial("uart.setBaudRate " + baud + "\n"); }
+    export function writeBuffer(buf: any) { board().writeSerial("uart.writeBuffer\n"); }
+    export function readBuffer(size: number): any { return pxsim.BufferMethods.createBuffer(size); }
+    export function available(): number { return 0; }
+}

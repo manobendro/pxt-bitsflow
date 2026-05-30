@@ -36,7 +36,13 @@
         "pins.ts",
         "pins.cpp",
         "neopixel.ts",
-        "neopixel.cpp"
+        "neopixel.cpp",
+        "spi.ts",
+        "spi.cpp",
+        "i2c.ts",
+        "i2c.cpp",
+        "uart.ts",
+        "uart.cpp"
     ],
     "public": true,
     "dependencies": {
