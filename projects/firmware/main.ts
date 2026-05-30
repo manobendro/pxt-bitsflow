@@ -29,9 +29,15 @@ pins.setPull(DigitalPin.P2, PinPullMode.PullUp)
 const strip = neopixel.create(DigitalPin.P3, 8)
 strip.setBrightness(64)
 strip.setPixelColor(0, neopixel.rgb(255, 0, 0))
+strip.setPixelBrightness(0, 128)
 strip.showColor(neopixel.colors(NeoPixelColors.Green))
 strip.clear()
 strip.show()
+
+// APA102 / DotStar (data + clock)
+const dot = neopixel.createAPA102(DigitalPin.P4, DigitalPin.P5, 8)
+dot.setPixelColor(0, NeoPixelColors.Blue)
+dot.show()
 
 // console / serial
 console.log(s)

@@ -1,13 +1,17 @@
 #include "pxt.h"
 
-// Native WS2812 / NeoPixel driver for the `neopixel.sendBuffer` shim (neopixel.ts).
+// Native driver for the neopixel shims (neopixel.ts):
+//   - sendBuffer  : WS2812/NeoPixel — one data pin, strict 800kHz timing
+//   - sendDotStar : APA102/DotStar  — data + clock pins, clocked (no timing constraint)
 //
-// On RP2040 the strict 800kHz WS2812 timing is generated in hardware by a PIO state
-// machine (no IRQ juggling needed). On the host VM there's no hardware, so it just logs.
+// On RP2040 WS2812 timing is generated in hardware by a PIO state machine; APA102 is
+// bit-banged on GPIO (it's clocked, so timing is relaxed). On the host VM there's no
+// hardware, so both just log.
 
 #ifdef PXT_RP2040
 #include "hardware/pio.h"
 #include "hardware/clocks.h"
+#include "hardware/gpio.h"
 #include "pico/time.h" // busy_wait_us
 
 // WS2812 PIO program (800kHz), assembled from the pico-sdk ws2812.pio example.
@@ -55,6 +59,22 @@ static void ws2812_init(int pin) {
     pio_sm_set_enabled(ws2812_pio, ws2812_sm, true);
     ws2812_pin = pin;
 }
+
+// APA102/DotStar: bit-bang the raw stream MSB-first on data, pulsing clock per bit.
+static bool apa_inited;
+static int apa_data = -1, apa_clk = -1;
+static void apa102_init(int dataPin, int clkPin) {
+    if (!apa_inited || apa_data != dataPin || apa_clk != clkPin) {
+        gpio_init(dataPin);
+        gpio_set_dir(dataPin, GPIO_OUT);
+        gpio_init(clkPin);
+        gpio_set_dir(clkPin, GPIO_OUT);
+        gpio_put(clkPin, 0);
+        apa_data = dataPin;
+        apa_clk = clkPin;
+        apa_inited = true;
+    }
+}
 #endif
 
 namespace neopixel {
@@ -77,6 +97,30 @@ void sendBuffer(int pin, Buffer buf) {
     (void)pin;
     if (buf)
         DMESG("neopixel: %d bytes -> pin %d", buf->length, pin);
+#endif
+}
+
+//%
+void sendDotStar(int dataPin, int clkPin, Buffer buf) {
+#ifdef PXT_RP2040
+    if (!buf || buf->length == 0)
+        return;
+    apa102_init(dataPin, clkPin);
+    const uint8_t *p = buf->data;
+    int len = buf->length;
+    for (int i = 0; i < len; i++) {
+        uint8_t v = p[i];
+        for (uint8_t mask = 0x80; mask; mask >>= 1) {
+            gpio_put(dataPin, (v & mask) ? 1 : 0);
+            gpio_put(clkPin, 1);
+            gpio_put(clkPin, 0);
+        }
+    }
+#else
+    (void)dataPin;
+    (void)clkPin;
+    if (buf)
+        DMESG("dotstar: %d bytes -> data %d clk %d", buf->length, dataPin, clkPin);
 #endif
 }
 
