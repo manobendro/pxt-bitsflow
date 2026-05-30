@@ -143,6 +143,13 @@ namespace pxt.editor {
     padding: 0.7em 1em !important;
     white-space: nowrap;
 }
+
+/* Subtle global tightening: the editor chrome is largely rem/em-based, so nudging the
+   root font size down ~6% shrinks the whole UI proportionally (toolbox, toolbars, menus,
+   dialogs). Blockly blocks use px and are unaffected. */
+html {
+    font-size: 15px !important;
+}
 `;
 
     function injectCss(): void {
