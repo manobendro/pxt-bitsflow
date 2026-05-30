@@ -49,6 +49,7 @@
     "appTheme": {
         "python": true,
         "extendEditor": true,
+        "hasReferenceDocs": true,
         "boardName": "Bitsflow RP2040",
         "boardNickname": "Bitsflow",
         "driveDisplayName": "RPI-RP2",
