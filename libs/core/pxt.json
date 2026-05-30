@@ -35,6 +35,7 @@
         "led.cpp",
         "pins.ts",
         "pins.cpp",
+        "pinevents.ts",
         "neopixel.ts",
         "neopixel.cpp",
         "spi.ts",
