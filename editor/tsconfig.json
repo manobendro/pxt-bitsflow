@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "noImplicitAny": true,
+        "declaration": false,
+        "outFile": "../built/editor.js",
+        "rootDir": ".",
+        "newLine": "LF",
+        "moduleResolution": "node",
+        "sourceMap": false,
+        "skipLibCheck": true,
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "es2017"
+        ],
+        "types": []
+    },
+    "include": [
+        "*.ts"
+    ]
+}

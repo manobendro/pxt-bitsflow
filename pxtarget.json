@@ -48,6 +48,7 @@
     },
     "appTheme": {
         "python": true,
+        "extendEditor": true,
         "accentColor": "#0078d7",
         "invertedMenu": true,
         "logoUrl": "https://github.com/",

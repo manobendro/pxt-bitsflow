@@ -65,3 +65,16 @@ namespace pxsim.led {
     export function off() { state = false; show(); }
     export function toggle() { state = !state; show(); }
 }
+
+// pins digital GPIO — no hardware in the sim, so report writes and return 0 for reads.
+namespace pxsim.pins {
+    const state: { [pin: number]: number } = {};
+    export function digitalWritePin(name: number, value: number) {
+        state[name] = value ? 1 : 0;
+        board().writeSerial("P" + name + " <- " + state[name] + "\n");
+    }
+    export function digitalReadPin(name: number): number {
+        return state[name] | 0;
+    }
+    export function setPull(name: number, pull: number) { /* no-op in sim */ }
+}

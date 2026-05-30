@@ -21,13 +21,25 @@ fi
 # Recreate the two cross-directory links as native, RELATIVE Linux symlinks so the
 # build resolves regardless of how the host stored them (Windows symlinks do not
 # reliably survive a bind mount). Relative targets stay valid on the host too.
-relink() {
-    local link="$ROOT/$1" tgt="$2"
-    rm -f "$link" 2>/dev/null || true
-    ln -s "$tgt" "$link"
+# pxt-core / pxt-common-packages / libs/base point at the sibling clones. The host links
+# them as Windows JUNCTIONS, which Docker does NOT follow in a bind mount — so the runner
+# scripts (tools/*.ps1) bind-mount the sibling clones directly onto these paths in the
+# container. We must NEVER rewrite these on the shared mount: doing so would replace the
+# host's Windows junction with a Linux symlink and break host `pxt serve`.
+ensure_link() {
+    local link="$ROOT/$1" tgt="$2" probe="$3"
+    [ -e "$link/$probe" ] && return 0                # resolved (bind mount / real dir / good symlink)
+    if [ -e "$link" ] || [ -L "$link" ]; then        # present but unresolvable (host junction)
+        echo "ERROR: '$1' exists but is not resolvable inside the container." >&2
+        echo "       Run via tools/build-rp2040.ps1 / tools/docker-vm.ps1 — they bind-mount" >&2
+        echo "       the sibling clones (pxt, pxt-common-packages) into the container." >&2
+        exit 1
+    fi
+    ln -s "$tgt" "$link"                             # truly absent (fresh clone) -> Linux symlink
 }
-relink "node_modules/pxt-core" "../../pxt"
-relink "libs/base"             "../node_modules/pxt-common-packages/libs/base"
+ensure_link "node_modules/pxt-core"            "../../pxt"                  "built/pxt.js"
+ensure_link "node_modules/pxt-common-packages" "../../pxt-common-packages" "libs/base/pxt.json"
+ensure_link "libs/base" "../node_modules/pxt-common-packages/libs/base"    "pxt.json"
 
 # Re-apply the host-VM C++ fixes (they live under node_modules, which npm install
 # reverts). Idempotent — no-op once patched.
@@ -42,8 +54,10 @@ if ! grep -q "runHostMakeAsync" /work/pxt/built/buildengine.js 2>/dev/null; then
 fi
 
 cd "$ROOT/$PROJ"
-echo "==> pxt build --localbuild   (emits binary.pxt64 + builds pxt-vm-cli via the make engine)"
-PXT_NODOCKER=1 pxt build --localbuild
+echo "==> pxt build --localbuild --force   (emits binary.pxt64 + pxtapp via the make engine)"
+# --force bypasses built/hexcache (created by `pxt buildtarget` for the editor); without
+# it the make engine is skipped and pxtapp/ is never generated for the firmware build.
+PXT_NODOCKER=1 pxt build --localbuild --force
 
 if [ -n "${BUILD_ONLY:-}" ]; then
     echo "==> BUILD_ONLY set — skipping VM run (bytecode + pxtapp are built)."

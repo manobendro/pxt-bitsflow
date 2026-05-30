@@ -12,13 +12,15 @@ set(CMAKE_CXX_STANDARD 11)
 
 pico_sdk_init()
 
-# Which compiled project to embed + build against. The make-engine build of this
-# project produces both binary.pxt64 (-> generated/vm_image.c) and the pxtapp/ C++.
+# Which compiled project supplies the VM C++ runtime + shim table (pointers.cpp).
+# Use the "firmware" shim-manifest project: it references every API so pointers.cpp
+# contains a SUPERSET of shims, letting the one firmware run any downloaded program.
+# (The program bytecode itself is NOT embedded — it's flashed to a fixed flash region
+# and loaded at boot; see src/rp2040_main.cpp.)
 if(NOT DEFINED PXT_PROJECT)
-    set(PXT_PROJECT "blink")
+    set(PXT_PROJECT "firmware")
 endif()
 set(PXTAPP "${CMAKE_CURRENT_LIST_DIR}/../../projects/${PXT_PROJECT}/built/make/pxtapp")
-set(GENERATED "${CMAKE_CURRENT_LIST_DIR}/generated")
 
 file(GLOB BASE_CPP "${PXTAPP}/base/*.cpp")
 # Core VM sources. vmcache.cpp is intentionally excluded — it is an optional on-disk
@@ -31,6 +33,7 @@ set(CORE_CPP
     "${PXTAPP}/core/dmesg.cpp"
     "${PXTAPP}/core/keys.cpp"
     "${PXTAPP}/core/led.cpp"
+    "${PXTAPP}/core/pins.cpp"
     "${PXTAPP}/core/vm.cpp"
     "${PXTAPP}/core/vmload.cpp"
     "${PXTAPP}/core/verify.cpp"
@@ -42,7 +45,6 @@ add_executable(bitsflow_vm_pico
     "${PXTAPP}/pointers.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/src/rp2040_platform.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/src/rp2040_main.cpp"
-    "${GENERATED}/vm_image.c"
 )
 
 target_include_directories(bitsflow_vm_pico PRIVATE

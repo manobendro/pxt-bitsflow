@@ -42,5 +42,10 @@ if ($Rebuild -or -not (docker images -q $image)) {
 Write-Host "==> running ($Project, ${Seconds}s) — workspace: $workspace" -ForegroundColor Cyan
 # Allocate a TTY (nice Ctrl-C) only in a real interactive terminal.
 $tty = if ([Environment]::UserInteractive -and -not [Console]::IsInputRedirected) { "-it" } else { "-i" }
-$dockerArgs = @("run", "--rm", $tty, "-e", "RUN_SECONDS=$Seconds", "-v", "${workspace}:/work", $image, $Project)
+# Bind-mount the sibling clones onto the package paths: the host links them as Windows
+# junctions, which Docker can't follow in a bind mount. These overlays leave the host
+# junctions untouched. (Defined in tools/pico-mounts.ps1, shared with build-rp2040.ps1.)
+. "$here\pico-mounts.ps1"
+$mounts = Get-PicoMounts $workspace
+$dockerArgs = @("run", "--rm", $tty, "-e", "RUN_SECONDS=$Seconds") + $mounts + @($image, $Project)
 docker @dockerArgs

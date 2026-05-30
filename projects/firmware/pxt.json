@@ -1,0 +1,6 @@
+{
+    "name": "firmware",
+    "description": "Shim manifest. Referenced only so the firmware's generated pointers.cpp contains a SUPERSET of shims, letting one prebuilt firmware run any downloaded program. Not run on the device.",
+    "dependencies": { "core": "file:../../libs/core" },
+    "files": [ "main.ts" ]
+}

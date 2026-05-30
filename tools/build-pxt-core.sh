@@ -44,4 +44,24 @@ const out = header + files.map(f => fs.readFileSync(f, "utf8")).join("\n");
 fs.writeFileSync("built/pxt.js", out);
 console.log("  wrote built/pxt.js (" + out.length + " bytes)");
 '
-echo "==> pxt-core CLI rebuilt."
+
+# Regenerate the WEBAPP bundles too (mirrors the gulp pxtapp/pxtworker tasks). The
+# editor (pxt serve) compiles in the browser using these; the prebuilt built/web copies
+# are stale and miss our pxtlib (make engine) + pxtcompiler (backvm .pxt64) fixes.
+echo "  concat built/web/pxtapp.js + pxtworker.js"
+node -e '
+const fs = require("fs");
+const cat = (files, header) => (header||"") + files.map(f => fs.readFileSync(f, "utf8")).join("\n");
+const lzma = "node_modules/lzma/src/lzma_worker-min.js";
+const purify = "node_modules/dompurify/dist/purify.min.js";
+const fuse = "node_modules/fuse.js/dist/fuse.min.js";
+const ts = "pxtcompiler/ext-typescript/lib/typescript.js";
+// pxtapp.js: main-thread editor bundle (contains pxtlib cpp.ts -> the make-engine fix)
+fs.writeFileSync("built/web/pxtapp.js",
+  cat([lzma, purify, "built/pxtlib.js", "built/pxtsim.js"]));
+// pxtworker.js: compile worker (contains pxtcompiler backvm -> correct .pxt64 emit)
+fs.writeFileSync("built/web/pxtworker.js",
+  cat([ts, fuse, lzma, purify, "built/pxtlib.js", "built/pxtcompiler.js", "built/pxtpy.js"], "\"use strict\";\n"));
+console.log("  wrote built/web/pxtapp.js + pxtworker.js");
+'
+echo "==> pxt-core CLI + webapp bundles rebuilt."

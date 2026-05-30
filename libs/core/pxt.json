@@ -32,7 +32,9 @@
         "Makefile",
         "vmscreen.cpp",
         "led.ts",
-        "led.cpp"
+        "led.cpp",
+        "pins.ts",
+        "pins.cpp"
     ],
     "public": true,
     "dependencies": {

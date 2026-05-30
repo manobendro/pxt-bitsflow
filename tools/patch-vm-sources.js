@@ -14,6 +14,17 @@ const path = require("path");
 const libs = process.argv[2] ||
     path.resolve(__dirname, "../node_modules/pxt-common-packages/libs");
 
+// If pxt-common-packages already ships its own RP2040 support (e.g. a cloned dev repo
+// with a native port), these legacy patches — written for the npm release that lacked
+// RP2040 — would conflict (duplicate #if branches). Detect and skip entirely.
+try {
+    const sched = fs.readFileSync(path.join(libs, "core---vm/scheduler.cpp"), "utf8");
+    if (sched.includes("PXT_RP2040")) {
+        console.log("pxt-common-packages already has native RP2040 support — skipping legacy VM patches.");
+        process.exit(0);
+    }
+} catch (e) { /* fall through to patching */ }
+
 function patch(file, marker, from, to) {
     const p = path.join(libs, file);
     let s = fs.readFileSync(p, "utf8");
@@ -24,8 +35,10 @@ function patch(file, marker, from, to) {
 }
 
 patch(
+    // marker "stdout": some pxt-common-packages versions already route sendSerial to
+    // stdout (fwrite/STDOUT_FILENO) — treat those as already patched.
     "core---linux/platform.cpp",
-    "STDOUT_FILENO",
+    "stdout",
 `void sendSerial(const char *data, int len) {
     /*
     if (!serial) {

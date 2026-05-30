@@ -1,29 +1,26 @@
 <#
 .SYNOPSIS
-  Build the RP2040 PXT VM firmware (.uf2) for a MakeCode project — fully in Docker.
+  Build the RP2040 PXT VM firmware + a program's UF2s — fully in Docker.
 
 .DESCRIPTION
-  Three stages, all containerized (host needs only Docker):
-    1. Build the project to VM bytecode + pxtapp C++ (the pxt-bitsflow-vm image).
-    2. Embed binary.pxt64 into firmware/rp2040/generated/vm_image.c.
-    3. Compile the firmware with arm-none-eabi + pico-sdk (the pxt-bitsflow-pico image)
-       -> firmware/rp2040/build/bitsflow_vm_pico.uf2.
+  New model: the VM firmware is built ONCE (no program embedded) and the program's
+  bytecode is flashed separately to a fixed flash region (0x10100000). Produces:
+    - firmware.uf2  : the VM firmware (program-independent). Also bundled to
+                      sim/public/firmware.uf2 for the in-editor download.
+    - bytecode.uf2  : the program (PXTB header + .pxt64) at 0x10100000 — flash this to
+                      update the program WITHOUT reflashing the firmware.
+    - combined.uf2  : firmware.uf2 ++ bytecode.uf2 — flash this once for a fresh board.
+  All under firmware/rp2040/build/.
 
-  Flash: hold BOOTSEL while plugging in the Pico, then copy the .uf2 onto the
-  RPI-RP2 drive (or use picotool).
+  Flash: hold BOOTSEL, plug in the Pico, copy the chosen .uf2 to the RPI-RP2 drive.
 
-.PARAMETER Project
-  Project dir name under projects/. Default: blink
-
-.PARAMETER Rebuild
-  Force a rebuild of the Docker images.
-
-.EXAMPLE
-  ./tools/build-rp2040.ps1
-  ./tools/build-rp2040.ps1 -Project blink -Rebuild
+.PARAMETER Project        Program project under projects/ (default: blink)
+.PARAMETER RebuildFirmware  Rebuild firmware.uf2 even if cached
+.PARAMETER Rebuild        Rebuild the Docker images
 #>
 param(
     [string]$Project = "blink",
+    [switch]$RebuildFirmware,
     [switch]$Rebuild
 )
 $ErrorActionPreference = "Stop"
@@ -33,43 +30,59 @@ $target    = Split-Path -Parent $here
 $workspace = Split-Path -Parent $target
 $vmImage   = "pxt-bitsflow-vm"
 $picoImage = "pxt-bitsflow-pico"
+$buildDir  = "$target\firmware\rp2040\build"
+$fwOut       = "$buildDir\bitsflow_vm_pico.uf2"   # cmake output
+$firmwareUf2 = "$buildDir\firmware.uf2"
+$bytecodeUf2 = "$buildDir\bytecode.uf2"
+$combinedUf2 = "$buildDir\combined.uf2"
+$bundledFw   = "$target\sim\public\firmware.uf2"
 
 function Invoke-Native($file, [string[]]$cliArgs) {
     & $file @cliArgs
     if ($LASTEXITCODE -ne 0) { throw "$file $($cliArgs -join ' ') failed ($LASTEXITCODE)" }
 }
 
-# --- images ---
+# Bind-mount the sibling clones onto the package paths (host links them as Windows
+# junctions Docker can't follow). Leaves host junctions untouched.
+. "$here\pico-mounts.ps1"
+$mounts = Get-PicoMounts $workspace
+
+# --- Docker images ---
 if ($Rebuild -or -not (docker images -q $vmImage)) {
-    Write-Host "==> building $vmImage" -ForegroundColor Cyan
     Invoke-Native docker @("build", "-t", $vmImage, "$target\docker")
 }
 if ($Rebuild -or -not (docker images -q $picoImage)) {
-    Write-Host "==> building $picoImage (clones pico-sdk; first run takes a few minutes)" -ForegroundColor Cyan
     Invoke-Native docker @("build", "-f", "$target\docker\Dockerfile.pico", "-t", $picoImage, "$target\docker")
 }
 
-# --- 1. compile project to bytecode + pxtapp (entrypoint fixes symlinks + patches) ---
-Write-Host "==> [1/3] building project '$Project' (bytecode + pxtapp)" -ForegroundColor Cyan
-Invoke-Native docker @("run", "--rm", "-e", "BUILD_ONLY=1", "-v", "${workspace}:/work",
-    $vmImage, "projects/$Project")
-
-# --- 2. embed the image ---
-Write-Host "==> [2/3] embedding binary.pxt64 -> generated/vm_image.c" -ForegroundColor Cyan
-Invoke-Native docker @("run", "--rm", "-v", "${workspace}:/work", "--entrypoint", "node", $vmImage,
-    "/work/pxt-bitsflow/tools/gen-vm-image.js",
-    "/work/pxt-bitsflow/projects/$Project/built/binary.pxt64",
-    "/work/pxt-bitsflow/firmware/rp2040/generated/vm_image.c")
-
-# --- 3. build firmware (.uf2) ---
-Write-Host "==> [3/3] compiling RP2040 firmware (pico-sdk)" -ForegroundColor Cyan
-$build = "cmake -G 'Unix Makefiles' -B build -S . -DPXT_PROJECT=$Project && cmake --build build -j4"
-Invoke-Native docker @("run", "--rm", "-v", "${workspace}:/work", $picoImage, "bash", "-lc", $build)
-
-$uf2 = "$target\firmware\rp2040\build\bitsflow_vm_pico.uf2"
-if (Test-Path $uf2) {
-    Write-Host "`n==> SUCCESS: $uf2" -ForegroundColor Green
-    Write-Host "    Flash: hold BOOTSEL, plug in the Pico, copy the .uf2 to the RPI-RP2 drive." -ForegroundColor Green
+# --- 1. Firmware (built once; program-independent) ---
+if ($RebuildFirmware -or -not (Test-Path $bundledFw)) {
+    Write-Host "==> [firmware] building VM firmware (shim-manifest superset, no embedded program)" -ForegroundColor Cyan
+    Invoke-Native docker (@("run", "--rm", "-e", "BUILD_ONLY=1") + $mounts + @($vmImage, "projects/firmware"))
+    Invoke-Native docker (@("run", "--rm") + $mounts + @($picoImage, "bash", "-lc",
+        "cmake -B build -S . -DPXT_PROJECT=firmware && cmake --build build -j4"))
+    Copy-Item $fwOut $firmwareUf2 -Force
+    New-Item -ItemType Directory -Force (Split-Path $bundledFw) | Out-Null
+    Copy-Item $fwOut $bundledFw -Force
+    Write-Host "    -> $firmwareUf2  (bundled: sim/public/firmware.uf2)" -ForegroundColor Green
 } else {
-    throw "firmware build finished but $uf2 was not produced"
+    Write-Host "==> [firmware] using cached firmware.uf2 (pass -RebuildFirmware to rebuild)" -ForegroundColor DarkGray
 }
+
+# --- 2. Program bytecode -> bytecode.uf2 (at 0x10100000) ---
+Write-Host "==> [program] compiling '$Project' and wrapping bytecode" -ForegroundColor Cyan
+Invoke-Native docker (@("run", "--rm", "-e", "BUILD_ONLY=1") + $mounts + @($vmImage, "projects/$Project"))
+Invoke-Native docker (@("run", "--rm") + $mounts + @("--entrypoint", "node", $vmImage,
+    "tools/gen-bytecode-uf2.js", "projects/$Project/built/binary.pxt64", "firmware/rp2040/build/bytecode.uf2"))
+
+# --- 3. Combined = firmware ++ bytecode (UF2 blocks self-address, so a byte concat) ---
+$fw = [System.IO.File]::ReadAllBytes($firmwareUf2)
+$bc = [System.IO.File]::ReadAllBytes($bytecodeUf2)
+[System.IO.File]::WriteAllBytes($combinedUf2, ($fw + $bc))
+
+Write-Host ""
+Write-Host "==> SUCCESS" -ForegroundColor Green
+Write-Host "    firmware: $firmwareUf2"
+Write-Host "    program : $bytecodeUf2"
+Write-Host "    combined: $combinedUf2"
+Write-Host "    Fresh board: flash combined.uf2. Update program only: flash bytecode.uf2." -ForegroundColor Green

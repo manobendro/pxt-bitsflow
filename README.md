@@ -118,13 +118,31 @@ docker run --rm -e RUN_SECONDS=3 -v C:\Workshop\makecode:/work pxt-bitsflow-vm p
 
 ## Program a real RP2040 — blink an LED from Blocks
 
-This target also builds a **bare-metal RP2040 firmware** that embeds the PXT VM and runs
-your compiled `.pxt64` on the chip. You write the program in Blocks/JS/Python (e.g. the
-`led` blocks below), and the firmware blinks a real LED.
+You write a program in Blocks/JS/Python and run it on a real Raspberry Pi Pico. The
+**VM firmware is built once** and the **program bytecode is flashed separately** to a
+fixed flash region — so updating a program never reflashes the firmware.
 
-### 1. Write the program (Blocks → `led`)
+### Architecture
 
-A small **LED** block category is built into the core (`libs/core/led.ts` + `led.cpp`):
+```
+flash 0x10000000  ┌───────────────────────┐
+                  │  VM firmware (built     │  built once (pico-sdk). Reads the program
+                  │  once, ~235 KB)         │  from the fixed region below and runs it.
+flash 0x10100000  ├───────────────────────┤
+                  │ "PXTB" + size + .pxt64  │  the program — flash this to update it
+                  └───────────────────────┘
+```
+
+- The firmware (`firmware/rp2040/`) embeds the PXT VM + a **superset of shims** (built from
+  the `projects/firmware` shim-manifest, so one firmware runs any program). At boot it reads
+  the header at `0x10100000` (`"PXTB"` magic + `uint32` size), copies the `.pxt64` to RAM,
+  and runs it. No program present → fast error blink on GPIO 15.
+- The program is a small UF2 placed at `0x10100000`. Because each UF2 block self-addresses,
+  **firmware.uf2 ++ bytecode.uf2 = a valid combined UF2** (just a byte concat).
+
+### Write the program (Blocks → `led`)
+
+A small **LED** category is built into the core (`libs/core/led.ts` + `led.cpp`):
 
 ```ts
 basic.forever(function () {
@@ -134,33 +152,43 @@ basic.forever(function () {
 ```
 
 `led.on()`, `led.off()`, `led.toggle()` drive a GPIO. `projects/blink` is this program.
-
-### 2. Wire the LED
-
-External LED on **GPIO 15** (default; change `BITSFLOW_LED_PIN` in `libs/core/led.cpp`):
+Wire an external LED on **GPIO 15** (change `BITSFLOW_LED_PIN` in `libs/core/led.cpp`):
 
 ```
 GPIO15 ──[ ~330Ω ]──▶|── GND
                      LED
 ```
 
-### 3. Build the firmware (.uf2) — fully in Docker
+### Download from the editor (everything in the browser)
+
+`pxt serve` → write a program → the **Download** dropdown offers two options (editor
+extension `editor/extension.ts`, enabled by `appTheme.extendEditor`):
+
+- **Firmware + program (.uf2)** — flash once on a fresh board.
+- **Program only (.uf2)** — flash to update the program on a board that already has the firmware.
+
+Both are assembled in the browser: the editor compiles to `.pxt64`, wraps it (header +
+UF2 at `0x10100000`) and, for the combined option, prepends the prebuilt
+`sim/public/firmware.uf2`. Flash by holding **BOOTSEL** and copying the `.uf2` to the
+`RPI-RP2` drive. Serial (`console.log`) is on USB **and** UART0 (GPIO0 TX, 115200).
+
+> The bundled `sim/public/firmware.uf2` is produced once by `tools/build-rp2040.ps1`
+> (`-RebuildFirmware`). Rebuild it whenever you change firmware C/patches or add APIs to
+> the shim manifest.
+
+### Build from the CLI (no editor) — fully in Docker
 
 Host needs only Docker (arm-none-eabi + pico-sdk live in the `pxt-bitsflow-pico` image):
 
 ```powershell
-./tools/build-rp2040.ps1                 # project defaults to "blink"
-./tools/build-rp2040.ps1 -Project blink  # -> firmware/rp2040/build/bitsflow_vm_pico.uf2
+./tools/build-rp2040.ps1                       # firmware (once) + blink program
+./tools/build-rp2040.ps1 -Project blink        # -> firmware/rp2040/build/{firmware,bytecode,combined}.uf2
+./tools/build-rp2040.ps1 -RebuildFirmware      # force-rebuild the firmware
 ```
 
-Three stages: compile the project to `binary.pxt64` + `pxtapp/` C++, embed the image into
-`firmware/rp2040/generated/vm_image.c`, then compile the firmware with the pico-sdk.
-
-### 4. Flash
-
-Hold **BOOTSEL** while plugging in the Pico, then copy `bitsflow_vm_pico.uf2` onto the
-`RPI-RP2` drive (or `picotool load`). The board reboots and the LED blinks twice a second.
-`console.log` output is available over USB serial.
+Outputs in `firmware/rp2040/build/`: `firmware.uf2` (also bundled to `sim/public/`),
+`bytecode.uf2` (program only), `combined.uf2` (fresh board). `tools/gen-bytecode-uf2.js`
+does the `.pxt64` → UF2 wrapping.
 
 ### How the VM runs on a 32-bit MCU
 
