@@ -17,6 +17,14 @@ fi
 cd "$PXT"
 echo "==> rebuilding pxt-core CLI in $PXT"
 
+# The common-sim string-extraction step typechecks against the standard TypeScript
+# lib.*.d.ts files at built/. A partial pxt-core build (this script) doesn't run the
+# full gulp pipeline that copies them, so `pxt serve`/`buildtarget` would spew
+# "TS6053: lib.dom.d.ts not found" + "Cannot find global type" noise. Copy them from the
+# TypeScript the pxt compiler bundles so the typecheck is clean.
+echo "  copying lib.*.d.ts -> built/"
+cp node_modules/typescript/lib/lib.*.d.ts built/ 2>/dev/null || true
+
 TSC="node node_modules/typescript/bin/tsc"
 for p in pxtlib pxtcompiler pxtpy pxtsim cli; do
     echo "  tsc -p $p"
