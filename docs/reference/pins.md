@@ -56,6 +56,34 @@ pins.setPull(DigitalPin.P0, PullMode.Up)
 pins.setPull(DigitalPin.P2, PullMode.Up)
 ```
 
+## onPinEvent
+
+Run code when a pin's level changes. A background task polls the pin (about every 2 ms)
+and raises an event on a **rising** edge (`0→1`), a **falling** edge (`1→0`), or any
+**change**. Enable a pull resistor with `setPull` first if the pin would otherwise float.
+
+```sig
+pins.onPinEvent(DigitalPin.P2, PinEvent.Falling, function () {})
+```
+
+### Parameters
+
+* `pin`: the [DigitalPin](/reference/pins) to watch, `P0` through `P28`.
+* `event`: `PinEvent.Rising`, `PinEvent.Falling`, or `PinEvent.Changed`.
+* `handler`: code to run when the event happens.
+
+### Example
+
+Toggle the LED each time a button on `P2` (wired to ground, internal pull-up enabled)
+is pressed.
+
+```blocks
+pins.setPull(DigitalPin.P2, PullMode.Up)
+pins.onPinEvent(DigitalPin.P2, PinEvent.Falling, function () {
+    led.toggle()
+})
+```
+
 ## Example
 
 Read a button on `P2` (with an internal pull-up) and mirror its state to the LED pin `P15`.
