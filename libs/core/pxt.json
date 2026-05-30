@@ -37,6 +37,7 @@
         "pins.cpp",
         "pinevents.ts",
         "oled.ts",
+        "bmp280.ts",
         "neopixel.ts",
         "neopixel.cpp",
         "spi.ts",

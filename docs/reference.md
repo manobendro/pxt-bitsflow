@@ -37,3 +37,4 @@ oled.init(128, 64, 60);
 * [I2C](reference/i2c.md) — I2C master bus
 * [UART](reference/uart.md) — second serial bus
 * [OLED display](reference/oled.md) — SSD1306 over I2C
+* [BMP280 sensor](reference/bmp280.md) — temperature + pressure over I2C
